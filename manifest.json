@@ -1,0 +1,14 @@
+{
+    "name": "Wölfe",
+    "short_name": "Wölfe",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "scope": "./",
+    "icons": [
+        {
+            "src": "./assets/media/logo.png",
+            "sizes": "180x180",
+            "type": "image/png"
+        }
+    ]
+}
