@@ -2270,6 +2270,8 @@ body.log_expanded #log_container .log_table_wrapper {
 
     h1 {
         font-size: 20px;
+        margin-bottom: 0;
+        background-color: #3c42643a;
     }
 
     body {
@@ -2291,6 +2293,42 @@ body.log_expanded #log_container .log_table_wrapper {
 
     .video_switch_btn[data-view="video"] {
         display: none;
+    }
+
+    /* Dokument am Handy: kein Editor, nur Dateiauswahl + Öffnen-Button */
+    .notes_toolbar > *:not(#doc_file_select):not(#doc_read) {
+        display: none;
+    }
+
+    .notes_toolbar {
+        justify-content: center;
+        gap: 8px;
+    }
+
+    #doc_file_select {
+        display: inline-block;
+        flex: 1;
+        max-width: none;
+        width: auto;
+    }
+
+    #doc_read {
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .doc_editable {
+        cursor: default;
+        white-space: nowrap;
+        overflow-x: auto;
+    }
+
+    .doc_editable * {
+        white-space: nowrap;
+    }
+
+    .doc_editable[contenteditable="false"] {
+        caret-color: transparent;
     }
 
     .table_gehalt_wrapper {
@@ -2321,7 +2359,19 @@ body.log_expanded #log_container .log_table_wrapper {
         text-overflow: clip !important;
     }
 
+    .goal_container {
+        background-color: #00000000;
+        border: none;
+    }
 
+    .video_switch_bar {
+        background-color: var(--primary-box-color);
+    }
+
+    .goal_container.video, .goal_container {
+        padding-left: 0;
+        padding-right: 0;
+    }
 }
 
 @media (min-width: 1024px) { 

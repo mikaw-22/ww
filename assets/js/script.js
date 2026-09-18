@@ -478,6 +478,20 @@ window.addEventListener('load', () => {
 
 const docEditor = document.getElementById('doc_editable');
 
+// ===== DOKUMENT AM HANDY: KEIN EDITOR, NUR ANZEIGE =====
+const docEditorMobileQuery = window.matchMedia('(max-width: 767.98px)');
+
+function applyDocEditableMode(isMobile) {
+    docEditor.setAttribute('contenteditable', isMobile ? 'false' : 'true');
+    docEditor.setAttribute(
+        'data-placeholder',
+        isMobile ? 'Bitte Datei auswählen...' : 'Notizen...'
+    );
+}
+
+applyDocEditableMode(docEditorMobileQuery.matches);
+docEditorMobileQuery.addEventListener('change', (e) => applyDocEditableMode(e.matches));
+
 function execCmd(cmd, value = null) {
     docEditor.focus();
     document.execCommand(cmd, false, value);
