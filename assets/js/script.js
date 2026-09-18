@@ -267,7 +267,7 @@ videoInput.addEventListener('change', (e) => {
 });
 
 // X-Button entfernt das Video wieder
-videoRemove.addEventListener('click', removeVideo);
+videoRemove?.addEventListener('click', removeVideo);
 
 // ===== VIDEO-STEUERUNG =====
 const FPS = 25; // Annahme: 25 Bilder/Sek. — falls dein Material anderes fps hat, hier anpassen
@@ -798,7 +798,31 @@ const uploadOptionsRow = document.getElementById('upload_options_row');
 const videoTabsBar=document.getElementById('video_tabs_bar');
 const videoTabAdd=document.getElementById('video_tab_add');
 function slot(i=activeVideoSlot){while(videoSlots.length<=i)videoSlots.push({file:null,game:'',url:null,time:0});return videoSlots[i]}
-function renderVideoTabs(){videoTabsBar.querySelectorAll('.video_tab_btn').forEach(x=>x.remove());videoSlots.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='video_tab_btn'+(i===activeVideoSlot?' active':'');b.textContent=v.game||`Video ${i+1}`;b.title=v.game||`Video ${i+1}`;b.onclick=()=>switchVideo(i);videoTabsBar.insertBefore(b,videoTabAdd)})}
+function renderVideoTabs(){
+    videoTabsBar.querySelectorAll('.video_tab_btn').forEach(x=>x.remove());
+    videoSlots.forEach((v,i)=>{
+        const b=document.createElement('button');
+        b.type='button';
+        b.className='video_tab_btn'+(i===activeVideoSlot?' active':'');
+        const label=document.createElement('span');
+        label.className='video_tab_label';
+        label.textContent=v.game||`Video ${i+1}`;
+        const close=document.createElement('span');
+        close.className='video_tab_close';
+        close.textContent='×';
+        close.title='Video entfernen';
+        close.setAttribute('role','button');
+        close.setAttribute('aria-label','Video entfernen');
+        close.addEventListener('click',async e=>{
+            e.stopPropagation();
+            await removeVideoAt(i);
+        });
+        b.append(label,close);
+        b.title=v.game||`Video ${i+1}`;
+        b.onclick=()=>switchVideo(i);
+        videoTabsBar.insertBefore(b,videoTabAdd);
+    })
+}
 function rememberVideo(){const v=slot();if(v.file&&videoPlayer.src)v.time=videoPlayer.currentTime||0}
 function freeUrl(v){if(v&&v.url){URL.revokeObjectURL(v.url);v.url=null}}
 async function switchVideo(i,seek=null){rememberVideo();activeVideoSlot=i;const v=slot(i);currentGame=v.game||'';renderVideoTabs();videoPlayer.pause();videoPlayer.removeAttribute('src');videoPlayer.load();gameNameContainer.style.display='none';if(!v.file){videoPreview.style.display='none';uploadOptionsRow.style.display='flex';return}if(!v.url)v.url=URL.createObjectURL(v.file);videoPlayer.src=v.url;videoPreview.style.display='block';uploadOptionsRow.style.display='none';const t=seek===null?v.time:Number(seek||0);videoPlayer.addEventListener('loadedmetadata',()=>{videoPlayer.currentTime=Math.max(0,Math.min(t,videoPlayer.duration||t));videoPlayer.pause()},{once:true})}
@@ -807,7 +831,25 @@ function handleLocalVideo(file){if(file.type!=='video/mp4'){alert('Bitte nur MP4
 async function confirmPendingLocalVideo(){if(!pendingVideoFile)return;const game=gameNameInput.value.trim();if(!game){gameNameInput.focus();return}const v=slot();freeUrl(v);v.file=pendingVideoFile;v.game=game;v.time=0;currentGame=game;pendingVideoFile=null;gameNameContainer.style.display='none';await saveVideoToDB(v.file,game);await switchVideo(activeVideoSlot)}
 confirmGameBtn?.addEventListener('click',confirmPendingLocalVideo);gameNameInput?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();confirmPendingLocalVideo()}});
 async function showVideo(file,{persist=true}={}){const v=slot();freeUrl(v);v.file=file;v.game=currentGame||v.game;if(persist&&v.game)await saveVideoToDB(file,v.game);await switchVideo(activeVideoSlot)}
-async function removeVideo(){const v=slot();const game=v.game;freeUrl(v);if(videoSlots.length>1){videoSlots.splice(activeVideoSlot,1);activeVideoSlot=Math.max(0,activeVideoSlot-1)}else videoSlots[0]={file:null,game:'',url:null,time:0};if(game)await clearVideoFromDB(game);await switchVideo(activeVideoSlot)}
+async function removeVideoAt(index){
+    const removingActive=index===activeVideoSlot;
+    const v=videoSlots[index];
+    if(!v)return;
+    const game=v.game;
+    freeUrl(v);
+    if(videoSlots.length>1){
+        videoSlots.splice(index,1);
+        if(index<activeVideoSlot) activeVideoSlot--;
+        else if(removingActive) activeVideoSlot=Math.min(index,videoSlots.length-1);
+    }else{
+        videoSlots[0]={file:null,game:'',url:null,time:0};
+        activeVideoSlot=0;
+    }
+    if(game)await clearVideoFromDB(game);
+    if(removingActive) await switchVideo(activeVideoSlot);
+    else renderVideoTabs();
+}
+async function removeVideo(){await removeVideoAt(activeVideoSlot)}
 renderVideoTabs();
 
 document.getElementById('switch_pos_radios').addEventListener('click', () => {
@@ -1178,20 +1220,10 @@ function updateLogEmptyState() {
     document.querySelector('.goal_container.log .log_table_wrapper').style.display = hasDocument ? 'block' : 'none';
 }
 
-let logPlayerFilter = null;
-let logGameFilter = null;
-
 function renderThrowsLog(data) {
     throwsLogBody.innerHTML = '';
 
     let rows = [...data];
-
-    if (logPlayerFilter) {
-        rows = rows.filter(row => String(row.player_id) === String(logPlayerFilter));
-    }
-    if (logGameFilter) {
-        rows = rows.filter(row => String(row.game || '') === String(logGameFilter));
-    }
 
     if (logPlayerSortDirection) {
         rows.sort((a, b) => {
@@ -1288,12 +1320,12 @@ function renderThrowsLog(data) {
         tr.innerHTML = `
             <td>${time}</td>
             <td>${teamName}</td>
-            <td class="log_filter_cell log_player_filter_cell" data-player-id="${row.player_id ?? ''}" title="Nur diesen Spieler anzeigen">${playerName}</td>
+            <td>${playerName}</td>
             <td>${cornerText}</td>
             <td>${goalText}</td>
             <td>${positionText}</td>
             <td>${noteText || '-'}</td>
-            <td class="log_filter_cell log_game_filter_cell" data-game="${String(row.game || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" title="Nur dieses Spiel anzeigen">${videoTimeText} (${gameText})</td>
+            <td>${videoTimeText} (${gameText})</td>
             <td style="display:flex;gap:5px;">
                 <button type="button" class="log_delete_btn log_view_btn" data-id="${row.id}">
                     <span class="material-symbols-outlined white_log">display_add</span>
@@ -1305,25 +1337,6 @@ function renderThrowsLog(data) {
         `;
 
         throwsLogBody.appendChild(tr);
-    });
-
-    throwsLogBody.querySelectorAll('.log_player_filter_cell').forEach(cell => {
-        cell.addEventListener('click', () => {
-            const playerId = cell.dataset.playerId;
-            logPlayerFilter = String(logPlayerFilter) === String(playerId) ? null : playerId;
-            logGameFilter = null;
-            renderThrowsLog(throwsData);
-        });
-    });
-
-    throwsLogBody.querySelectorAll('.log_game_filter_cell').forEach(cell => {
-        cell.addEventListener('click', () => {
-            const game = cell.dataset.game;
-            if (!game) return;
-            logGameFilter = logGameFilter === game ? null : game;
-            logPlayerFilter = null;
-            renderThrowsLog(throwsData);
-        });
     });
 
     wireLogButtons();
@@ -1352,7 +1365,7 @@ async function loadThrowsLog() {
 
     const { data, error } = await supabaseClient
         .from('throws')
-        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, player_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
+        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
         .eq('team_id', currentDocumentTeamId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -1371,8 +1384,6 @@ function setCurrentDocument(filename) {
     const team = findTeamForDocument(filename);
     currentDocumentTeamId = team?.id || null;
     logPlayerSortDirection = null;
-    logPlayerFilter = null;
-    logGameFilter = null;
     logPlayerHeader?.classList.remove('active');
     updateLogEmptyState();
     loadThrowsLog();

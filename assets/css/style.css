@@ -67,7 +67,7 @@ h1 {
 
 .board {
     display: flex;
-    flex-direction: row;   /* geändert von column */
+    flex-direction: row;   /* geÃ¤ndert von column */
     gap: 16px;
     align-items: stretch;
     position: relative;
@@ -231,9 +231,9 @@ button:hover {
     margin-left: 190px
 }
 
-/* ===== GEÄNDERT =====
-   width: fit-content entfernt, box-sizing: border-box hinzugefügt,
-   width: 100% hinzugefügt, margin auf 0 gesetzt (Abstand kommt jetzt
+/* ===== GEÃ„NDERT =====
+   width: fit-content entfernt, box-sizing: border-box hinzugefÃ¼gt,
+   width: 100% hinzugefÃ¼gt, margin auf 0 gesetzt (Abstand kommt jetzt
    vom "gap" des .board Grids statt von hardcodierten margin-Werten). */
 .goal_container {
     background-color: var(--primary-box-color);
@@ -253,7 +253,7 @@ button:hover {
 
 .goal_container.halbkreis_wrapper {
     align-self: flex-start;
-    max-width: 462px; /* ersetz mit dem tatsächlichen px-Wert, den .tor gerade hat */
+    max-width: 462px; /* ersetz mit dem tatsÃ¤chlichen px-Wert, den .tor gerade hat */
 }
 
 .wrapper {
@@ -435,7 +435,7 @@ button {
     padding-right: 15px;
     position: relative;
     height: 616px;      /* fest statt min-height */
-    max-height: 1000px;  /* zusätzliche Sicherheit */
+    max-height: 1000px;  /* zusÃ¤tzliche Sicherheit */
     overflow: hidden;   /* verhindert, dass irgendwas den Container selbst sprengt */
 }
 
@@ -457,7 +457,7 @@ button {
 }
 
 .goal_container.video {
-    position: relative; /* Bezugspunkt für den absolut positionierten X-Button */
+    position: relative; /* Bezugspunkt fÃ¼r den absolut positionierten X-Button */
     padding-left: 15px;
     padding-right: 15px;
     padding-bottom: 15px;
@@ -465,7 +465,7 @@ button {
 
 .video_preview {
     position: absolute;
-    inset: 0; /* füllt die ganze .goal_container.video Box aus */
+    inset: 0; /* fÃ¼llt die ganze .goal_container.video Box aus */
 }
 
 .video_preview video {
@@ -566,7 +566,7 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;   /* ← das fehlte für die vertikale Zentrierung */
+    justify-content: center;   /* â† das fehlte fÃ¼r die vertikale Zentrierung */
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -586,12 +586,12 @@ button {
 #video_time_display {
     font-size: 11px;
     color: #ffffffcc;
-    font-variant-numeric: tabular-nums; /* Ziffern bleiben beim Zählen gleich breit, kein "Wackeln" */
+    font-variant-numeric: tabular-nums; /* Ziffern bleiben beim ZÃ¤hlen gleich breit, kein "Wackeln" */
 }
 
 .doc_textarea {
     width: 100%;
-    flex: 1;          /* füllt die restliche verfügbare Höhe im Flex-Container */
+    flex: 1;          /* fÃ¼llt die restliche verfÃ¼gbare HÃ¶he im Flex-Container */
     resize: none;
     background: #00000030;
     color: white;
@@ -1071,7 +1071,7 @@ button {
     position: absolute;
     cursor: default;
     z-index: 25;
-    display: none;   /* ← neu, feste Basis */
+    display: none;   /* â† neu, feste Basis */
 }
 
 .position-radio.pos_visible {
@@ -1516,7 +1516,7 @@ button {
 .log_table_wrapper {
     flex: 1;
     min-height: 0;
-    overflow-y: scroll;   /* geändert von auto -> immer gleich viel reservierter Platz */
+    overflow-y: scroll;   /* geÃ¤ndert von auto -> immer gleich viel reservierter Platz */
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #ffffff1e transparent;
@@ -1969,7 +1969,7 @@ textarea.note {
     padding: 0; 
 }
 
-/* Der X-Button bleibt außerhalb der schwarzen Steuerleiste sichtbar. */
+/* Der X-Button bleibt auÃŸerhalb der schwarzen Steuerleiste sichtbar. */
 .video_remove { 
     z-index: 30; 
 }
@@ -2143,7 +2143,7 @@ body.log_expanded {
     --expanded-handle: 10px;
 }
 
-/* alte Regel body.log_expanded .board { display:none } gezielt überschreiben */
+/* alte Regel body.log_expanded .board { display:none } gezielt Ã¼berschreiben */
 body.log_expanded .board {
     display: block !important;
     position: fixed;
@@ -2446,5 +2446,16 @@ body.log_expanded #video_preview {
 }
 
 /* Klickbare Filterwerte im Log */
-.log_filter_cell { cursor:pointer; transition:background-color .15s ease,color .15s ease; }
-.log_filter_cell:hover { background-color:#ffffff12; color:#fff; }
+.log_filter_cell { 
+    cursor:pointer; 
+    transition:background-color .15s ease,color .15s ease; 
+}
+
+.log_filter_cell:hover { 
+    background-color:#ffffff12; 
+    color:#fff; 
+}
+
+.video_tab_close {
+    margin-left: 5px;
+}
