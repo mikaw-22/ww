@@ -2409,7 +2409,7 @@ body.log_expanded #log_container .log_table_wrapper {
     }
 
     .goal_container.video {
-        height: 100%;
+        height: 627px;
     }
 
     select {
@@ -2434,6 +2434,10 @@ body.log_expanded #log_container .log_table_wrapper {
     .cancel_all_btn .material-symbols-outlined {
         font-size: 15px;
         color: #5a8ee7;
+        margin: 0 0 0 0.5px;
+    }
+
+    button#cancel_all_btn.cancel_all_btn {
     }
 
 }
