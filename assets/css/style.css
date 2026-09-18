@@ -67,7 +67,7 @@ h1 {
 
 .board {
     display: flex;
-    flex-direction: row;   /* geÃ¤ndert von column */
+    flex-direction: row;   /* geÃƒÂ¤ndert von column */
     gap: 16px;
     align-items: stretch;
     position: relative;
@@ -231,9 +231,9 @@ button:hover {
     margin-left: 190px
 }
 
-/* ===== GEÃ„NDERT =====
-   width: fit-content entfernt, box-sizing: border-box hinzugefÃ¼gt,
-   width: 100% hinzugefÃ¼gt, margin auf 0 gesetzt (Abstand kommt jetzt
+/* ===== GEÃƒâ€žNDERT =====
+   width: fit-content entfernt, box-sizing: border-box hinzugefÃƒÂ¼gt,
+   width: 100% hinzugefÃƒÂ¼gt, margin auf 0 gesetzt (Abstand kommt jetzt
    vom "gap" des .board Grids statt von hardcodierten margin-Werten). */
 .goal_container {
     background-color: var(--primary-box-color);
@@ -253,7 +253,7 @@ button:hover {
 
 .goal_container.halbkreis_wrapper {
     align-self: flex-start;
-    max-width: 462px; /* ersetz mit dem tatsÃ¤chlichen px-Wert, den .tor gerade hat */
+    max-width: 462px; /* ersetz mit dem tatsÃƒÂ¤chlichen px-Wert, den .tor gerade hat */
 }
 
 .wrapper {
@@ -435,7 +435,7 @@ button {
     padding-right: 15px;
     position: relative;
     height: 616px;      /* fest statt min-height */
-    max-height: 1000px;  /* zusÃ¤tzliche Sicherheit */
+    max-height: 1000px;  /* zusÃƒÂ¤tzliche Sicherheit */
     overflow: hidden;   /* verhindert, dass irgendwas den Container selbst sprengt */
 }
 
@@ -457,7 +457,7 @@ button {
 }
 
 .goal_container.video {
-    position: relative; /* Bezugspunkt fÃ¼r den absolut positionierten X-Button */
+    position: relative; /* Bezugspunkt fÃƒÂ¼r den absolut positionierten X-Button */
     padding-left: 15px;
     padding-right: 15px;
     padding-bottom: 15px;
@@ -465,7 +465,7 @@ button {
 
 .video_preview {
     position: absolute;
-    inset: 0; /* fÃ¼llt die ganze .goal_container.video Box aus */
+    inset: 0; /* fÃƒÂ¼llt die ganze .goal_container.video Box aus */
 }
 
 .video_preview video {
@@ -566,7 +566,7 @@ button {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;   /* â† das fehlte fÃ¼r die vertikale Zentrierung */
+    justify-content: center;   /* Ã¢â€ Â das fehlte fÃƒÂ¼r die vertikale Zentrierung */
     width: 100%;
     height: 100%;
     box-sizing: border-box;
@@ -586,12 +586,12 @@ button {
 #video_time_display {
     font-size: 11px;
     color: #ffffffcc;
-    font-variant-numeric: tabular-nums; /* Ziffern bleiben beim ZÃ¤hlen gleich breit, kein "Wackeln" */
+    font-variant-numeric: tabular-nums; /* Ziffern bleiben beim ZÃƒÂ¤hlen gleich breit, kein "Wackeln" */
 }
 
 .doc_textarea {
     width: 100%;
-    flex: 1;          /* fÃ¼llt die restliche verfÃ¼gbare HÃ¶he im Flex-Container */
+    flex: 1;          /* fÃƒÂ¼llt die restliche verfÃƒÂ¼gbare HÃƒÂ¶he im Flex-Container */
     resize: none;
     background: #00000030;
     color: white;
@@ -1071,7 +1071,7 @@ button {
     position: absolute;
     cursor: default;
     z-index: 25;
-    display: none;   /* â† neu, feste Basis */
+    display: none;   /* Ã¢â€ Â neu, feste Basis */
 }
 
 .position-radio.pos_visible {
@@ -1516,7 +1516,7 @@ button {
 .log_table_wrapper {
     flex: 1;
     min-height: 0;
-    overflow-y: scroll;   /* geÃ¤ndert von auto -> immer gleich viel reservierter Platz */
+    overflow-y: scroll;   /* geÃƒÂ¤ndert von auto -> immer gleich viel reservierter Platz */
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #ffffff1e transparent;
@@ -1969,7 +1969,7 @@ textarea.note {
     padding: 0; 
 }
 
-/* Der X-Button bleibt auÃŸerhalb der schwarzen Steuerleiste sichtbar. */
+/* Der X-Button bleibt auÃƒÅ¸erhalb der schwarzen Steuerleiste sichtbar. */
 .video_remove { 
     z-index: 30; 
 }
@@ -2143,7 +2143,7 @@ body.log_expanded {
     --expanded-handle: 10px;
 }
 
-/* alte Regel body.log_expanded .board { display:none } gezielt Ã¼berschreiben */
+/* alte Regel body.log_expanded .board { display:none } gezielt ÃƒÂ¼berschreiben */
 body.log_expanded .board {
     display: block !important;
     position: fixed;
@@ -2458,4 +2458,85 @@ body.log_expanded #video_preview {
 
 .video_tab_close {
     margin-left: 5px;
+}
+
+/* ===== ABSCHLIESSENDER EXPANDED-MODE OVERRIDE ===== */
+body.log_expanded {
+    --expanded-split: 50%;
+    --expanded-handle: 12px;
+    overflow: hidden !important;
+}
+body.log_expanded > *:not(h1):not(.board):not(.bottom-row):not(#expanded_resize_handle) { display:none !important; }
+body.log_expanded .board {
+    display:block !important; position:fixed !important;
+    top:var(--log-expanded-top,70px) !important; bottom:15px !important;
+    left:15px !important; right:auto !important;
+    width:calc(var(--expanded-split) - var(--expanded-handle)/2) !important;
+    height:auto !important; margin:0 !important; z-index:9996 !important;
+}
+body.log_expanded .board > .left-column { display:none !important; }
+body.log_expanded .board > .goal_container.video {
+    display:flex !important; width:100% !important; height:100% !important;
+    min-width:0 !important; min-height:0 !important; max-height:none !important; margin:0 !important;
+}
+body.log_expanded .board > .goal_container.video .video_view.active { width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important; }
+body.log_expanded .expanded_resize_handle {
+    display:flex !important; position:fixed !important;
+    top:var(--log-expanded-top,70px) !important; bottom:15px !important;
+    left:calc(15px + var(--expanded-split) - var(--expanded-handle)/2) !important;
+    right:auto !important; width:var(--expanded-handle) !important; height:auto !important;
+    cursor:col-resize !important; touch-action:none !important; z-index:10002 !important;
+    align-items:center !important; justify-content:center !important;
+}
+body.log_expanded .expanded_resize_handle::after { content:''; width:3px !important; height:70px !important; background:#ffffff66; border-radius:3px; }
+body.log_expanded .bottom-row {
+    display:block !important; position:fixed !important;
+    top:var(--log-expanded-top,70px) !important; bottom:15px !important;
+    left:calc(15px + var(--expanded-split) + var(--expanded-handle)/2) !important;
+    right:15px !important; width:auto !important; height:auto !important;
+    margin:0 !important; padding:0 !important; z-index:9998 !important;
+}
+body.log_expanded .bottom-row > *:not(#log_container) { display:none !important; }
+body.log_expanded #log_container {
+    display:flex !important; flex-direction:column !important;
+    width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important;
+    max-width:none !important; max-height:none !important; margin:0 !important; overflow:hidden !important;
+}
+
+body.log_expanded #log_container .log_header_wrapper {
+    display:block !important; width:100% !important; min-width:0 !important;
+    overflow-x:hidden !important; overflow-y:hidden !important;
+}
+
+body.log_expanded #log_container .log_table_wrapper {
+    display:block !important; flex:1 1 0 !important;
+    width:100% !important; min-width:0 !important; min-height:0 !important;
+    overflow-x:auto !important; overflow-y:auto !important;
+    scrollbar-width:auto !important; scrollbar-color:#ffffff55 #ffffff0d !important;
+}
+
+body.log_expanded #log_container .log_header_wrapper .log_table,
+body.log_expanded #log_container .log_table_wrapper .log_table {
+    width:max(1200px, 100%) !important; 
+    min-width:1200px !important; 
+    max-width:none !important; 
+    table-layout:fixed !important;
+}
+
+body.log_expanded #log_container .log_table_wrapper::-webkit-scrollbar { 
+    width:8px; 
+    height:10px; 
+}
+
+body.log_expanded #log_container .log_table_wrapper::-webkit-scrollbar-track { 
+    background:#ffffff0d; 
+}
+
+body.log_expanded #log_container .log_table_wrapper::-webkit-scrollbar-thumb { 
+    background:#ffffff55; 
+    border-radius:5px; 
+}
+body.expanded_resizing, body.expanded_resizing * { 
+    cursor:col-resize !important; 
+    user-select:none !important; 
 }

@@ -1079,106 +1079,41 @@ window.addEventListener('resize', () => {
 });
 
 const expandedResizeHandle = document.getElementById('expanded_resize_handle');
-
 let expandedResizeActive = false;
-let resizeStartMouseY = 0;
-let resizeStartSplitPx = 0;
+
+function setExpandedSplitFromPointer(clientX) {
+    const sidePadding = 15;
+    const usableWidth = window.innerWidth - (sidePadding * 2);
+    if (usableWidth <= 0) return;
+    let split = clientX - sidePadding;
+    const minPane = Math.min(320, usableWidth * 0.30);
+    split = Math.max(minPane, Math.min(usableWidth - minPane, split));
+    document.body.style.setProperty('--expanded-split', `${split}px`);
+}
 
 expandedResizeHandle?.addEventListener('pointerdown', (event) => {
     if (!document.body.classList.contains('log_expanded')) return;
-
     expandedResizeActive = true;
-
-    // Mausposition beim Start merken
-    resizeStartMouseY = event.clientY;
-
-    // Aktuelle echte Position des Handles merken
-    const handleRect = expandedResizeHandle.getBoundingClientRect();
-
-    const heading = document.querySelector('body > h1');
-    const workspaceTop = heading
-        ? heading.getBoundingClientRect().bottom
-        : 0;
-
-    resizeStartSplitPx =
-        handleRect.top +
-        (handleRect.height / 2) -
-        workspaceTop;
-
     expandedResizeHandle.setPointerCapture?.(event.pointerId);
-
-    document.body.style.cursor = 'row-resize';
-
+    document.body.classList.add('expanded_resizing');
+    setExpandedSplitFromPointer(event.clientX);
     event.preventDefault();
 });
-
-
-window.addEventListener('pointermove', (event) => {
+expandedResizeHandle?.addEventListener('pointermove', (event) => {
     if (!expandedResizeActive) return;
-
-    const heading = document.querySelector('body > h1');
-
-    const workspaceTop = heading
-        ? heading.getBoundingClientRect().bottom
-        : 0;
-
-    const bottomPadding = 15;
-
-    const availableHeight =
-        window.innerHeight -
-        workspaceTop -
-        bottomPadding;
-
-    if (availableHeight <= 0) return;
-
-    // Wie weit wurde die Maus tatsächlich bewegt?
-    const deltaY =
-        event.clientY - resizeStartMouseY;
-
-    // Aktuelle Splitposition + nur die Mausbewegung
-    let newSplit =
-        resizeStartSplitPx + deltaY;
-
-    // Mindesthöhe oben/unten
-    const minPanelHeight = Math.min(
-        180,
-        availableHeight * 0.3
-    );
-
-    newSplit = Math.max(
-        minPanelHeight,
-        Math.min(
-            availableHeight - minPanelHeight,
-            newSplit
-        )
-    );
-
-    // WICHTIG:
-    // jetzt direkt px statt Prozent
-    document.body.style.setProperty(
-        '--expanded-split',
-        `${newSplit}px`
-    );
+    setExpandedSplitFromPointer(event.clientX);
+    event.preventDefault();
 });
-
-
-function stopExpandedResize() {
+function stopExpandedResize(event) {
     if (!expandedResizeActive) return;
-
     expandedResizeActive = false;
-    document.body.style.cursor = '';
+    document.body.classList.remove('expanded_resizing');
+    if (event?.pointerId !== undefined && expandedResizeHandle?.hasPointerCapture?.(event.pointerId)) {
+        expandedResizeHandle.releasePointerCapture(event.pointerId);
+    }
 }
-
-
-window.addEventListener(
-    'pointerup',
-    stopExpandedResize
-);
-
-window.addEventListener(
-    'pointercancel',
-    stopExpandedResize
-);
+expandedResizeHandle?.addEventListener('pointerup', stopExpandedResize);
+expandedResizeHandle?.addEventListener('pointercancel', stopExpandedResize);
 
 const throwsLogBody = document.getElementById('throws_log_body');
 const logEmptyState = document.getElementById('log_empty_state');
@@ -1187,6 +1122,8 @@ const logPlayerHeader = document.getElementById('log_player_header');
 let currentDocumentTeamId = null;
 let currentDocumentFilename = null;
 let logPlayerSortDirection = null; // null = Standard, asc/desc = Spieler sortiert
+let logPlayerFilter = null;
+let logGameFilter = null;
 
 function normalizeDocumentName(name) {
     return String(name || '')
@@ -1224,6 +1161,9 @@ function renderThrowsLog(data) {
     throwsLogBody.innerHTML = '';
 
     let rows = [...data];
+
+    if (logPlayerFilter !== null) rows = rows.filter(row => String(row.player_id ?? '') === String(logPlayerFilter));
+    if (logGameFilter !== null) rows = rows.filter(row => String(row.game || '') === String(logGameFilter));
 
     if (logPlayerSortDirection) {
         rows.sort((a, b) => {
@@ -1320,12 +1260,12 @@ function renderThrowsLog(data) {
         tr.innerHTML = `
             <td>${time}</td>
             <td>${teamName}</td>
-            <td>${playerName}</td>
+            <td class="log_player_filter_cell" data-player-id="${row.player_id ?? ''}">${playerName}</td>
             <td>${cornerText}</td>
             <td>${goalText}</td>
             <td>${positionText}</td>
             <td>${noteText || '-'}</td>
-            <td>${videoTimeText} (${gameText})</td>
+            <td class="log_game_filter_cell" data-game="${String(row.game || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${videoTimeText} (${gameText})</td>
             <td style="display:flex;gap:5px;">
                 <button type="button" class="log_delete_btn log_view_btn" data-id="${row.id}">
                     <span class="material-symbols-outlined white_log">display_add</span>
@@ -1339,6 +1279,18 @@ function renderThrowsLog(data) {
         throwsLogBody.appendChild(tr);
     });
 
+    throwsLogBody.querySelectorAll('.log_player_filter_cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const id=cell.dataset.playerId; if(!id)return;
+            logPlayerFilter=String(logPlayerFilter)===String(id)?null:id; logGameFilter=null; renderThrowsLog(throwsData);
+        });
+    });
+    throwsLogBody.querySelectorAll('.log_game_filter_cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const game=cell.dataset.game; if(!game)return;
+            logGameFilter=logGameFilter===game?null:game; logPlayerFilter=null; renderThrowsLog(throwsData);
+        });
+    });
     wireLogButtons();
 }
 
@@ -1365,7 +1317,7 @@ async function loadThrowsLog() {
 
     const { data, error } = await supabaseClient
         .from('throws')
-        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
+        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, player_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
         .eq('team_id', currentDocumentTeamId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -1384,6 +1336,8 @@ function setCurrentDocument(filename) {
     const team = findTeamForDocument(filename);
     currentDocumentTeamId = team?.id || null;
     logPlayerSortDirection = null;
+    logPlayerFilter = null;
+    logGameFilter = null;
     logPlayerHeader?.classList.remove('active');
     updateLogEmptyState();
     loadThrowsLog();
@@ -1754,3 +1708,10 @@ async function shareNote() {
         if(saved.length){videoSlots=saved.map(v=>({file:v.file,game:v.game,url:null,time:0}));activeVideoSlot=0;await switchVideo(0)}
     } catch(error){console.error('Videos konnten nicht geladen werden:',error)}
 })();
+
+// Expanded Log: horizontalen Tabellen-Scroll mit Header synchronisieren
+const logExpandedHeaderScroll = document.querySelector('#log_container .log_header_wrapper');
+const logExpandedBodyScroll = document.querySelector('#log_container .log_table_wrapper');
+logExpandedBodyScroll?.addEventListener('scroll', () => {
+    if (logExpandedHeaderScroll) logExpandedHeaderScroll.scrollLeft = logExpandedBodyScroll.scrollLeft;
+});
