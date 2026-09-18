@@ -192,6 +192,8 @@ playerSelect.addEventListener('change', () => {
 // ===== AKTUELLES SPIEL / VIDEO =====
 let currentGame = '';
 let pendingVideoFile = null;
+let videoSlots = [{file:null,game:'',url:null,time:0}];
+let activeVideoSlot = 0;
 
 // ===== SPEICHERN-BUTTON =====
 const saveBtn = document.querySelector('.save_btn');
@@ -792,103 +794,21 @@ async function renderMenuTable() {
 
 const uploadOptionsRow = document.getElementById('upload_options_row');
 
-// Lokales Video: erst Spielnamen abfragen, anschließend Video laden.
-function handleLocalVideo(file) {
-    if (file.type !== 'video/mp4') {
-        alert('Bitte nur MP4-Dateien.');
-        videoInput.value = '';
-        return;
-    }
-
-    if (!gameNameContainer || !gameNameInput || !confirmGameBtn) {
-        console.error('gameNameContainer, gameNameInput oder confirmGameBtn fehlt im HTML.');
-        alert('Die Spielnamen-Eingabe fehlt im HTML.');
-        videoInput.value = '';
-        return;
-    }
-
-    pendingVideoFile = file;
-    currentGame = '';
-
-    // Das neue Video wird vor der Bestätigung noch nicht angezeigt.
-    videoPlayer.pause();
-    videoPlayer.removeAttribute('src');
-    videoPlayer.load();
-    videoPreview.style.display = 'none';
-    uploadOptionsRow.style.display = 'none';
-
-    gameNameInput.value = '';
-    gameNameContainer.style.display = 'block';
-    gameNameInput.focus();
-}
-
-async function confirmPendingLocalVideo() {
-    if (!pendingVideoFile) return;
-
-    const gameName = gameNameInput.value.trim();
-    if (!gameName) {
-        gameNameInput.focus();
-        return;
-    }
-
-    currentGame = gameName;
-    const file = pendingVideoFile;
-    pendingVideoFile = null;
-
-    gameNameContainer.style.display = 'none';
-    await showVideo(file, { persist: true });
-}
-
-confirmGameBtn?.addEventListener('click', confirmPendingLocalVideo);
-gameNameInput?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        confirmPendingLocalVideo();
-    }
-});
-
-async function showVideo(file, { persist = true } = {}) {
-    if (file.type !== 'video/mp4') {
-        alert('Bitte nur MP4-Dateien.');
-        return;
-    }
-
-    const oldUrl = videoPlayer.dataset.objectUrl;
-    if (oldUrl) URL.revokeObjectURL(oldUrl);
-
-    const url = URL.createObjectURL(file);
-    videoPlayer.dataset.objectUrl = url;
-    videoPlayer.src = url;
-    uploadOptionsRow.style.display = 'none';
-    videoPreview.style.display = 'block';
-
-    if (persist) {
-        await saveVideoToDB(file, currentGame);
-    }
-}
-
-async function removeVideo() {
-    videoPlayer.pause();
-
-    const oldUrl = videoPlayer.dataset.objectUrl;
-    if (oldUrl) {
-        URL.revokeObjectURL(oldUrl);
-        delete videoPlayer.dataset.objectUrl;
-    }
-
-    videoPlayer.removeAttribute('src');
-    videoPlayer.load();
-    videoPreview.style.display = 'none';
-    uploadOptionsRow.style.display = 'flex';
-    videoInput.value = '';
-
-    currentGame = '';
-    pendingVideoFile = null;
-    if (gameNameInput) gameNameInput.value = '';
-    if (gameNameContainer) gameNameContainer.style.display = 'none';
-
-    await clearVideoFromDB();
-}
+// Mehrere lokale Videos gleichzeitig offen halten
+const videoTabsBar=document.getElementById('video_tabs_bar');
+const videoTabAdd=document.getElementById('video_tab_add');
+function slot(i=activeVideoSlot){while(videoSlots.length<=i)videoSlots.push({file:null,game:'',url:null,time:0});return videoSlots[i]}
+function renderVideoTabs(){videoTabsBar.querySelectorAll('.video_tab_btn').forEach(x=>x.remove());videoSlots.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='video_tab_btn'+(i===activeVideoSlot?' active':'');b.textContent=v.game||`Video ${i+1}`;b.title=v.game||`Video ${i+1}`;b.onclick=()=>switchVideo(i);videoTabsBar.insertBefore(b,videoTabAdd)})}
+function rememberVideo(){const v=slot();if(v.file&&videoPlayer.src)v.time=videoPlayer.currentTime||0}
+function freeUrl(v){if(v&&v.url){URL.revokeObjectURL(v.url);v.url=null}}
+async function switchVideo(i,seek=null){rememberVideo();activeVideoSlot=i;const v=slot(i);currentGame=v.game||'';renderVideoTabs();videoPlayer.pause();videoPlayer.removeAttribute('src');videoPlayer.load();gameNameContainer.style.display='none';if(!v.file){videoPreview.style.display='none';uploadOptionsRow.style.display='flex';return}if(!v.url)v.url=URL.createObjectURL(v.file);videoPlayer.src=v.url;videoPreview.style.display='block';uploadOptionsRow.style.display='none';const t=seek===null?v.time:Number(seek||0);videoPlayer.addEventListener('loadedmetadata',()=>{videoPlayer.currentTime=Math.max(0,Math.min(t,videoPlayer.duration||t));videoPlayer.pause()},{once:true})}
+videoTabAdd.addEventListener('click',()=>{rememberVideo();videoSlots.push({file:null,game:'',url:null,time:0});switchVideo(videoSlots.length-1);videoInput.click()});
+function handleLocalVideo(file){if(file.type!=='video/mp4'){alert('Bitte nur MP4-Dateien.');return}pendingVideoFile=file;gameNameInput.value=slot().game||'';videoPreview.style.display='none';uploadOptionsRow.style.display='none';gameNameContainer.style.display='block';gameNameInput.focus()}
+async function confirmPendingLocalVideo(){if(!pendingVideoFile)return;const game=gameNameInput.value.trim();if(!game){gameNameInput.focus();return}const v=slot();freeUrl(v);v.file=pendingVideoFile;v.game=game;v.time=0;currentGame=game;pendingVideoFile=null;gameNameContainer.style.display='none';await saveVideoToDB(v.file,game);await switchVideo(activeVideoSlot)}
+confirmGameBtn?.addEventListener('click',confirmPendingLocalVideo);gameNameInput?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();confirmPendingLocalVideo()}});
+async function showVideo(file,{persist=true}={}){const v=slot();freeUrl(v);v.file=file;v.game=currentGame||v.game;if(persist&&v.game)await saveVideoToDB(file,v.game);await switchVideo(activeVideoSlot)}
+async function removeVideo(){const v=slot();const game=v.game;freeUrl(v);if(videoSlots.length>1){videoSlots.splice(activeVideoSlot,1);activeVideoSlot=Math.max(0,activeVideoSlot-1)}else videoSlots[0]={file:null,game:'',url:null,time:0};if(game)await clearVideoFromDB(game);await switchVideo(activeVideoSlot)}
+renderVideoTabs();
 
 document.getElementById('switch_pos_radios').addEventListener('click', () => {
     document.querySelectorAll('.position-radio').forEach(radio => {
@@ -1258,10 +1178,20 @@ function updateLogEmptyState() {
     document.querySelector('.goal_container.log .log_table_wrapper').style.display = hasDocument ? 'block' : 'none';
 }
 
+let logPlayerFilter = null;
+let logGameFilter = null;
+
 function renderThrowsLog(data) {
     throwsLogBody.innerHTML = '';
 
     let rows = [...data];
+
+    if (logPlayerFilter) {
+        rows = rows.filter(row => String(row.player_id) === String(logPlayerFilter));
+    }
+    if (logGameFilter) {
+        rows = rows.filter(row => String(row.game || '') === String(logGameFilter));
+    }
 
     if (logPlayerSortDirection) {
         rows.sort((a, b) => {
@@ -1358,12 +1288,12 @@ function renderThrowsLog(data) {
         tr.innerHTML = `
             <td>${time}</td>
             <td>${teamName}</td>
-            <td>${playerName}</td>
+            <td class="log_filter_cell log_player_filter_cell" data-player-id="${row.player_id ?? ''}" title="Nur diesen Spieler anzeigen">${playerName}</td>
             <td>${cornerText}</td>
             <td>${goalText}</td>
             <td>${positionText}</td>
             <td>${noteText || '-'}</td>
-            <td>${videoTimeText} (${gameText})</td>
+            <td class="log_filter_cell log_game_filter_cell" data-game="${String(row.game || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}" title="Nur dieses Spiel anzeigen">${videoTimeText} (${gameText})</td>
             <td style="display:flex;gap:5px;">
                 <button type="button" class="log_delete_btn log_view_btn" data-id="${row.id}">
                     <span class="material-symbols-outlined white_log">display_add</span>
@@ -1375,6 +1305,25 @@ function renderThrowsLog(data) {
         `;
 
         throwsLogBody.appendChild(tr);
+    });
+
+    throwsLogBody.querySelectorAll('.log_player_filter_cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const playerId = cell.dataset.playerId;
+            logPlayerFilter = String(logPlayerFilter) === String(playerId) ? null : playerId;
+            logGameFilter = null;
+            renderThrowsLog(throwsData);
+        });
+    });
+
+    throwsLogBody.querySelectorAll('.log_game_filter_cell').forEach(cell => {
+        cell.addEventListener('click', () => {
+            const game = cell.dataset.game;
+            if (!game) return;
+            logGameFilter = logGameFilter === game ? null : game;
+            logPlayerFilter = null;
+            renderThrowsLog(throwsData);
+        });
     });
 
     wireLogButtons();
@@ -1403,7 +1352,7 @@ async function loadThrowsLog() {
 
     const { data, error } = await supabaseClient
         .from('throws')
-        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
+        .select('id, corner, is_goal, position, note, game, created_at, video_timestamp, team_id, player_id, teams(name, logo_key), players(jersey_number, name, photo_key)')
         .eq('team_id', currentDocumentTeamId)
         .order('created_at', { ascending: false })
         .limit(50);
@@ -1422,6 +1371,8 @@ function setCurrentDocument(filename) {
     const team = findTeamForDocument(filename);
     currentDocumentTeamId = team?.id || null;
     logPlayerSortDirection = null;
+    logPlayerFilter = null;
+    logGameFilter = null;
     logPlayerHeader?.classList.remove('active');
     updateLogEmptyState();
     loadThrowsLog();
@@ -1547,16 +1498,9 @@ function applyThrowView(row) {
 
     document.querySelector('.goal_container.dashboard').classList.add('locked_view');
 
-    if (row.video_timestamp !== null && row.video_timestamp !== undefined && videoPlayer.src) {
-        videoPlayer.currentTime = row.video_timestamp;
-        videoPlayer.pause();
-
-        const videoTabBtn = document.querySelector('.video_switch_btn[data-view="video"]');
-        if (videoTabBtn && !videoTabBtn.classList.contains('active')) {
-            videoTabBtn.click();
-        }
-    }
-}
+    if (row.video_timestamp !== null && row.video_timestamp !== undefined) {
+        openVideoForThrow(row).catch(error => console.error('Video konnte nicht geoeffnet werden:', error));
+    }}
 
 function exitLogViewMode() {
     currentlyViewedThrowId = null;
@@ -1585,64 +1529,15 @@ function exitLogViewMode() {
     clearAllRadios();
 }
 
-// ===== VIDEO-PERSISTENZ (IndexedDB) =====
-const VIDEO_DB_NAME = 'videoStorage';
-const VIDEO_STORE_NAME = 'localVideo';
-
-function openVideoDB() {
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(VIDEO_DB_NAME, 1);
-        request.onupgradeneeded = () => {
-            request.result.createObjectStore(VIDEO_STORE_NAME);
-        };
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function saveVideoToDB(file, game = '') {
-    const db = await openVideoDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(VIDEO_STORE_NAME, 'readwrite');
-        tx.objectStore(VIDEO_STORE_NAME).put({ file, game }, 'current');
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
-
-async function loadVideoFromDB() {
-    const db = await openVideoDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(VIDEO_STORE_NAME, 'readonly');
-        const request = tx.objectStore(VIDEO_STORE_NAME).get('current');
-        request.onsuccess = () => {
-            const saved = request.result;
-            if (!saved) {
-                resolve(null);
-                return;
-            }
-
-            // Abwärtskompatibel: ältere Versionen haben direkt nur das File gespeichert.
-            if (saved instanceof Blob) {
-                resolve({ file: saved, game: '' });
-                return;
-            }
-
-            resolve(saved);
-        };
-        request.onerror = () => reject(request.error);
-    });
-}
-
-async function clearVideoFromDB() {
-    const db = await openVideoDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(VIDEO_STORE_NAME, 'readwrite');
-        tx.objectStore(VIDEO_STORE_NAME).delete('current');
-        tx.oncomplete = () => resolve();
-        tx.onerror = () => reject(tx.error);
-    });
-}
+// ===== VIDEO-PERSISTENZ (IndexedDB), je Spiel ein Video =====
+const VIDEO_DB_NAME='videoStorage',VIDEO_STORE_NAME='localVideo';
+function openVideoDB(){return new Promise((ok,no)=>{const r=indexedDB.open(VIDEO_DB_NAME,1);r.onupgradeneeded=()=>{if(!r.result.objectStoreNames.contains(VIDEO_STORE_NAME))r.result.createObjectStore(VIDEO_STORE_NAME)};r.onsuccess=()=>ok(r.result);r.onerror=()=>no(r.error)})}
+function gameKey(g){return 'game:'+String(g||'').trim().toLocaleLowerCase('de-DE')}
+async function saveVideoToDB(file,game){if(!game)return;const db=await openVideoDB();return new Promise((ok,no)=>{const tx=db.transaction(VIDEO_STORE_NAME,'readwrite');tx.objectStore(VIDEO_STORE_NAME).put({file,game},gameKey(game));tx.oncomplete=ok;tx.onerror=()=>no(tx.error)})}
+async function loadVideoByGame(game){const db=await openVideoDB();return new Promise((ok,no)=>{const r=db.transaction(VIDEO_STORE_NAME,'readonly').objectStore(VIDEO_STORE_NAME).get(gameKey(game));r.onsuccess=()=>ok(r.result||null);r.onerror=()=>no(r.error)})}
+async function loadAllVideosFromDB(){const db=await openVideoDB();return new Promise((ok,no)=>{const r=db.transaction(VIDEO_STORE_NAME,'readonly').objectStore(VIDEO_STORE_NAME).getAll();r.onsuccess=()=>ok((r.result||[]).filter(x=>x?.file&&x?.game));r.onerror=()=>no(r.error)})}
+async function clearVideoFromDB(game){const db=await openVideoDB();return new Promise((ok,no)=>{const tx=db.transaction(VIDEO_STORE_NAME,'readwrite');tx.objectStore(VIDEO_STORE_NAME).delete(gameKey(game));tx.oncomplete=ok;tx.onerror=()=>no(tx.error)})}
+async function openVideoForThrow(row){if(!row?.game)return false;const n=String(row.game).trim().toLocaleLowerCase('de-DE');let i=videoSlots.findIndex(v=>String(v.game||'').trim().toLocaleLowerCase('de-DE')===n);if(i<0){const saved=await loadVideoByGame(row.game);if(!saved?.file){alert(`Kein gespeichertes Video fuer "${row.game}" gefunden.`);return false}videoSlots.push({file:saved.file,game:saved.game||row.game,url:null,time:0});i=videoSlots.length-1}const videoBtn=document.querySelector('.video_switch_btn[data-view="video"]');if(videoBtn&&!videoBtn.classList.contains('active'))videoBtn.click();await switchVideo(i,row.video_timestamp??0);return true}
 
 // ===== STATISTIK =====
 const statTeamSelect = document.getElementById('stat_team_select');
@@ -1843,10 +1738,8 @@ async function shareNote() {
 }
 
 (async () => {
-    const savedVideo = await loadVideoFromDB();
-
-    if (savedVideo?.file) {
-        currentGame = savedVideo.game || '';
-        await showVideo(savedVideo.file, { persist: false });
-    }
+    try {
+        const saved=await loadAllVideosFromDB();
+        if(saved.length){videoSlots=saved.map(v=>({file:v.file,game:v.game,url:null,time:0}));activeVideoSlot=0;await switchVideo(0)}
+    } catch(error){console.error('Videos konnten nicht geladen werden:',error)}
 })();

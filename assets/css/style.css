@@ -476,7 +476,7 @@ button {
 
 .video_remove {
     position: absolute;
-    top: 10px;
+    top: 40px;
     right: 10px;
     width: 28px;
     height: 28px;
@@ -2388,3 +2388,63 @@ body.log_expanded #log_container .log_table_wrapper {
     }
 
 }
+/* Multi-Video Tabs */
+.video_tabs_bar{position:absolute;top:44px;left:15px;right:15px;z-index:40;display:flex;gap:5px;align-items:center;overflow-x:auto}.video_tab_btn,.video_tab_add{width:auto;min-width:62px;height:27px;margin:0;padding:0 9px;border-radius:5px;background:#2a2744;border:1px solid #ffffff3b;color:#ffffffbb;font-size:12px;flex:0 0 auto}.video_tab_btn.active{background:#4a5d7e;color:#fff}.video_tab_add{min-width:29px;width:29px;padding:0;font-size:18px}#videoview_video.active{position:relative;padding-top:35px}#videoview_video .video_preview{margin-top:35px;height:calc(100% - 35px)}
+
+/* Video-Untertabs auf derselben Hoehe wie Dokument-/Statistik-Werkzeugleisten */
+#videoview_video.active {
+    position: relative;
+    padding-top: 0;
+    justify-content: flex-start;
+}
+#videoview_video .video_tabs_bar {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 100%;
+    min-height: 45px;
+    padding: 9px 8px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #00000030;
+    border: 1px solid #ffffff3b;
+    border-bottom: none;
+    border-radius: 4px 4px 0 0;
+    overflow-x: auto;
+    flex-shrink: 0;
+    z-index: 40;
+}
+#videoview_video .video_tab_btn,
+#videoview_video .video_tab_add {
+    height: 26px;
+    margin: 0;
+}
+#videoview_video .video_preview {
+    margin-top: 0;
+    width: 100%;
+    flex: 1;
+    min-height: 0;
+    height: auto;
+}
+#videoview_video .upload_options_row,
+#videoview_video #gameNameContainer {
+    margin: auto;
+}
+body.log_expanded #videoview_video .video_tabs_bar {
+    flex-shrink: 0;
+}
+body.log_expanded #video_preview {
+    position: relative;
+    inset: auto;
+    flex: 1;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+}
+
+/* Klickbare Filterwerte im Log */
+.log_filter_cell { cursor:pointer; transition:background-color .15s ease,color .15s ease; }
+.log_filter_cell:hover { background-color:#ffffff12; color:#fff; }
