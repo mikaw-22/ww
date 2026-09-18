@@ -2125,7 +2125,7 @@ body.log_expanded #log_container {
     margin: 0;
     border-radius: 0;
     box-sizing: border-box;
-    margin: 15px
+    margin: 15px;
 }
 
 body.log_expanded #log_container .log_table_wrapper {
@@ -2527,7 +2527,7 @@ body.log_expanded .board {
 body.log_expanded .board > .left-column { display:none !important; }
 body.log_expanded .board > .goal_container.video {
     display:flex !important; width:100% !important; height:100% !important;
-    min-width:0 !important; min-height:0 !important; max-height:none !important; margin:0 !important;
+    min-width:0 !important; min-height:0 !important; max-height:none !important; margin:0; margin-top: 7.5px;
 }
 body.log_expanded .board > .goal_container.video .video_view.active { width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important; }
 body.log_expanded .expanded_resize_handle {
@@ -2550,7 +2550,7 @@ body.log_expanded .bottom-row > *:not(#log_container) { display:none !important;
 body.log_expanded #log_container {
     display:flex !important; flex-direction:column !important;
     width:100% !important; height:100% !important; min-width:0 !important; min-height:0 !important;
-    max-width:none !important; max-height:none !important; margin:0 !important; overflow:hidden !important;
+    max-width:none !important; max-height:none !important; margin:0;margin-top: 7.5px; overflow:hidden !important;
 }
 
 body.log_expanded #log_container .log_header_wrapper {
@@ -2589,4 +2589,8 @@ body.log_expanded #log_container .log_table_wrapper::-webkit-scrollbar-thumb {
 body.expanded_resizing, body.expanded_resizing * { 
     cursor:col-resize !important; 
     user-select:none !important; 
+}
+
+body.log_expanded > h1 {
+    display: none;
 }
