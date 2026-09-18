@@ -1016,7 +1016,7 @@ button {
     border-collapse: collapse;
     color: #fff;
     font-size: 13px;
-    overflow-y: auto;
+    overflow-y: hidden;
     scrollbar-width: thin;
     scrollbar-color: #ffffff1e transparent;
 }
@@ -1515,8 +1515,8 @@ button {
 
 .log_table_wrapper {
     flex: 1;
-    min-height: 0;
-    overflow-y: scroll;   /* geÃƒÂ¤ndert von auto -> immer gleich viel reservierter Platz */
+    min-height: 0:
+    overflow-y: hidden;   /* geÃƒÂ¤ndert von auto -> immer gleich viel reservierter Platz */
     overflow-x: hidden;
     scrollbar-width: thin;
     scrollbar-color: #ffffff1e transparent;
