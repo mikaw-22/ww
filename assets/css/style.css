@@ -1,6 +1,6 @@
 :root {
   --primary-bg-color: #2a2744;
-  --primary-box-color: #3c4264;
+  --primary-box-color: #3c426473;
 }
 
 html, body {
@@ -145,7 +145,7 @@ select {
     outline: none;
     width: 220px;
     height: 30px;
-    background-color: var(--primary-box-color);
+    background-color: #4a5d7eb4;
     color: white;
     border: 1px solid #ffffff3b;
     padding: 0 5px;
@@ -154,7 +154,7 @@ select {
 select:disabled {
     cursor: not-allowed;
     opacity: 0.5;
-    background-color: var(--primary-box-color);
+    background-color: #4a5d7eb4;
 }
 
 .lock.disabled {
@@ -180,7 +180,7 @@ textarea {
 }
 
 .teams_options, .players_options {
-    background-color: #4a5d7e;
+    background-color: #4a5d7eb4;
     color: white;
     font-size: 9px;
     border-radius: 4px;
@@ -240,7 +240,7 @@ button:hover {
     box-sizing: border-box;
     width: 100%;
     padding: 35.5px 30px 0 30px;
-    border: 1px dashed white;
+    border: 1px dashed rgba(255, 255, 255, 0.425);
     margin: 0;
 }
 
@@ -271,7 +271,7 @@ button:hover {
     height: 67px;
     margin: 0;
     padding: 0;
-    background-color: #6581b0;
+    background-color: #6580b07a;
     border: 1px dashed #ffffff;
 }
 
@@ -664,7 +664,7 @@ button {
     font-size: 12px;
     padding: 0 4px;
     cursor: default;
-    background-color: #4a5d7e;
+    background-color: #4a5d7eb4;
     width: max-content;
 }
 
@@ -1391,34 +1391,6 @@ button {
 
 .gear_btn span {
     margin: 0 0 -1px;
-}
-
-.table_gehalt_wrapper {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-}
-
-.table_gehalt_wrapper::-webkit-scrollbar {
-    height: 4px;
-}
-
-.table_gehalt_wrapper::-webkit-scrollbar-thumb {
-    background: #ffffff1e;
-    border-radius: 2px;
-}
-
-.table_gehalt {
-    width: max-content;
-    min-width: 700px;
-    white-space: nowrap;
-    table-layout: auto;
-}
-
-.table_gehalt td,
-.table_gehalt th {
-    white-space: nowrap;
 }
 
 #videoview_gehalt {
@@ -2244,6 +2216,7 @@ body.log_expanded #log_container .log_table_wrapper {
     margin-top: 15px;
 }
 
+
 .sevenm {
     appearance: none;
     width: 47.5px;
@@ -2621,4 +2594,92 @@ body.log_expanded > h1 {
     .goal_container.video {
         height: 616px;
     }
+}
+
+/* Header-Paddings nur im normalen Modus (nicht expanded) */
+body:not(.log_expanded) .log_header th:nth-child(3) { padding-left: 7.5px; }
+body:not(.log_expanded) .log_header th:nth-child(4) { padding-left: 10px; }
+body:not(.log_expanded) .log_header th:nth-child(5) { padding-left: 11px; }
+body:not(.log_expanded) .log_header th:nth-child(6) { padding-left: 13px; }
+body:not(.log_expanded) .log_header th:nth-child(7) { padding-left: 13px; }
+body:not(.log_expanded) .log_header th:nth-child(8) { padding-left: 16px; }
+body:not(.log_expanded) .log_header th:nth-child(9) { padding-left: 18px; }
+
+/* Toolbar: zentriert, solange Platz ist, sonst links beginnen + scrollbar */
+@media (min-width: 768px) {
+    .notes_toolbar,
+    .stats_filter_bar {
+        justify-content: flex-start;
+    }
+
+    .notes_toolbar > :first-child,
+    .stats_filter_bar > :first-child {
+        margin-left: auto;
+    }
+
+    .notes_toolbar > :last-child,
+    .stats_filter_bar > :last-child {
+        margin-right: auto;
+    }
+}
+
+/* ===== GEHALT-TABELLE ===== */
+.table_gehalt_wrapper {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.table_gehalt_wrapper::-webkit-scrollbar {
+    height: 4px;
+}
+
+.table_gehalt_wrapper::-webkit-scrollbar-thumb {
+    background: #ffffff1e;
+    border-radius: 2px;
+}
+
+.table_gehalt {
+    width: 100%;
+    min-width: 700px;
+    white-space: nowrap;
+    table-layout: auto;
+}
+
+.table_gehalt td,
+.table_gehalt th {
+    white-space: nowrap;
+    width: 1%;              /* alle normalen Spalten so schmal wie ihr Inhalt */
+}
+
+/* Nur die letzte Spalte (Notiz) bekommt den Restplatz */
+.table_gehalt td:last-child,
+.table_gehalt th:last-child {
+    width: 1%;
+    min-width: 3cm;          /* Mindestbreite der Zelle, damit nichts abgeschnitten wird */
+    padding-right: 12px;
+}
+
+.table_gehalt .td_notiz {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: none;         /* keine eigene Begrenzung mehr */
+    height: 25px;
+    box-sizing: border-box;  /* Padding + Rahmen zählen in die Breite hinein */
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
+    scrollbar-width: thin;
+    scrollbar-color: #ffffff3b transparent;
+}
+
+.table_gehalt .td_notiz::-webkit-scrollbar {
+    height: 3px;
+}
+
+.table_gehalt .td_notiz::-webkit-scrollbar-thumb {
+    background: #ffffff3b;
+    border-radius: 2px;
 }
