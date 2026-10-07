@@ -1048,6 +1048,7 @@ button {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    margin-left:210px;
 }
 
 .log_delete_btn {
@@ -2596,4 +2597,28 @@ body.expanded_resizing, body.expanded_resizing * {
 
 body.log_expanded > h1 {
     display: none;
+}
+
+/* ===== VIDEO-CONTAINER: Höhe folgt der linken Spalte ===== */
+@media (min-width: 768px) {
+    .board {
+        align-items: stretch;
+    }
+
+    .goal_container.video {
+        height: auto;
+        max-height: none;
+        min-height: 0;
+        align-self: stretch;
+        flex: 1 1 0;
+        min-width: 0;
+        contain: size;   /* Inhalt darf die Höhe nicht mehr bestimmen */
+    }
+}
+
+/* Handy: linke Spalte ist ausgeblendet, also feste Höhe behalten */
+@media (max-width: 767.98px) {
+    .goal_container.video {
+        height: 616px;
+    }
 }

@@ -1272,15 +1272,15 @@ function renderThrowsLog(data) {
         tr.dataset.throwId = row.id;
 
         tr.innerHTML = `
-            <td>${time}</td>
-            <td>${teamName}</td>
+            <td style="">${time}</td>
+            <td style="">${teamName}</td>
             <td class="log_player_filter_cell" data-player-id="${row.player_id ?? ''}">${playerName}</td>
-            <td>${cornerText}</td>
-            <td>${goalText}</td>
-            <td>${positionText}</td>
-            <td>${noteText || '-'}</td>
-            <td class="log_game_filter_cell" data-game="${String(row.game || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${videoTimeText} (${gameText})</td>
-            <td style="display:flex;gap:5px;">
+            <td style="right:-5px">${cornerText}</td>
+            <td style="right:-5px">${goalText}</td>
+            <td style="right:-5px">${positionText}</td>
+            <td style="">${noteText || '-'}</td>
+            <td style="" class="log_game_filter_cell" data-game="${String(row.game || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;')}">${videoTimeText} (${gameText})</td>
+            <td style="display:flex;gap:5px;margin-left:-12px">
                 <button type="button" class="log_delete_btn log_view_btn" data-id="${row.id}">
                     <span class="material-symbols-outlined white_log">display_add</span>
                 </button>
